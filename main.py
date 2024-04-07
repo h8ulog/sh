@@ -58,14 +58,23 @@ class Enemy(GameSprite):
 
 ship = Player(img_hero, 5, win_height - 80, 80, 100, 10)
 bullets = sprite.Group()
+monsters = sprite.Group()
+for i in range(1, 6):
+    monster = Enemy(img_enemy, randint(50, win_width - 80), -60, 50, randint(1, 5))
+    monsters.add(monster)
 mixer.init()
 mixer.music.load('space.ogg')
 mixer.music.play()
 fire_sound = mixer.Sound('fire.ogg')
-
+font.init()
+font1 = font.Font(None, 80)
+font2 = font.Font(None, 36)
+win = font1.render('You win!', True, (255, 255, 255))
+lose = font1.render('You lose!', True, (255, 0, 0))
 background = transform.scale(image.load(img_back), (win_width, win_height))
 finish = False
 run = True
+goal = 15
 while run:
     for e in event.get():
         if e.type == QUIT:
@@ -77,8 +86,21 @@ while run:
         window.blit(background, (0, 0))
         ship.update()
         bullets.update()
+        monsters.update()
+        text = font2.render('Score: ' + str(score), True, (255, 255, 255))
+        window.blit(text, (10, 20))
+        text_lose = font2.render('Lost: ' + str(lost), True, (255, 255, 255))
+        window.blit(text_lose, (10, 50))
         ship.reset()
         bullets.draw(window)
+        monsters.draw(window)
+        collides = sprite.groupcollide(monsters, bullets, True, True)
+        for c in collides:
+            score += 1
+            monster =Enemy(img_enemy, randint(50, win_width - 80))
+            monsters.add(monster)
+        if score >= goal:
+            finish = True
+            window.blit(win, (200, 200))
         display.update()
     time.delay(50)
-
