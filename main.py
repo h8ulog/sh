@@ -1,5 +1,6 @@
 from pygame import *
 from random import randint
+from time import time as timer
 win_width = 700
 win_height = 500
 display.set_caption('Shooter')
@@ -75,13 +76,22 @@ background = transform.scale(image.load(img_back), (win_width, win_height))
 finish = False
 run = True
 goal = 15
+life = 3
+max_fire = 5
+real_time = False
+num_fire = 0
 while run:
     for e in event.get():
         if e.type == QUIT:
             run = False
         elif e.type == KEYDOWN:
             if e.key == K_SPACE:
-                ship.fire()
+                if num_fire < max_fire and real_time == False:
+                    num_fire += 1
+                    fire_sound.play()
+                    ship.fire()
+                if num_fire >= max_fire and real_time == False:
+                    last_time =
     if not finish:
         window.blit(background, (0, 0))
         ship.update()
@@ -99,8 +109,43 @@ while run:
             score += 1
             monster =Enemy(img_enemy, randint(50, win_width - 80))
             monsters.add(monster)
+        if real_time == True:
+            now_time = timer()
+            if now_time - last_time < 3:
+                reload = font2.render('Wait, reload...', True, (255,0,0))
+                window.blit(reload, (260,460))
+            else:
+                real_time = False
+                num_fire = 0
+        if life == 3:
+            life_color = (0,150,0)
+        if life == 2:
+            life_color = (150,150,0)
+        if life == 1:
+            life_color = (150,0,0)
+        text_life = font1.render(str(life), True, life_color)
+        window.blit(text_life, (650,10))
+        if sprite.spritecollide(ship, monsters, False):
+            sprite.spritecollide(ship, monsters, True)
+            life -= 1
+        if life == 0 or lost >= max_lost:
+            finish = True
+            window.blit(lose, (200,200))
         if score >= goal:
             finish = True
             window.blit(win, (200, 200))
-        display.update()
+    else:
+        time.delay(3000)
+        score = 0
+        lost = 0
+        life = 3
+        num_fire = 0
+        finish = False
+        for b in bullets:
+            b.kill()
+        for m in monsters:
+            m.kill()
+        for i in range(1,6):
+            monster = Enemy(img_enemy, randint(50, win_width-80), -60, 80, 60, randint(1,5) )
+    display.update()
     time.delay(50)
