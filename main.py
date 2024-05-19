@@ -6,7 +6,7 @@ win_height = 500
 display.set_caption('Shooter')
 window = display.set_mode((win_width, win_height))
 
-img_back = 'galaxy.jpg'
+img_back = 'background.jpg'
 img_hero = 'rocket.png'
 img_bullet = 'bullet.png'
 img_enemy = 'ufo.png'
@@ -20,6 +20,7 @@ class GameSprite(sprite.Sprite):
         sprite.Sprite.__init__(self)
         self.image = transform.scale(image.load(player_image), (size_x, size_y))
         self.speed = player_speed
+        self.rect = self.image.get_rect()
         self.rect.x = player_x
         self.rect.y = player_y
 
@@ -53,7 +54,7 @@ class Enemy(GameSprite):
         global lost
         if self.rect.y > win_height:
             self.rect.x = randint(80, win_width - 80)
-            self.rect.t = -50
+            self.rect.y = -50
             lost += 1
 
 
@@ -61,7 +62,7 @@ ship = Player(img_hero, 5, win_height - 80, 80, 100, 10)
 bullets = sprite.Group()
 monsters = sprite.Group()
 for i in range(1, 6):
-    monster = Enemy(img_enemy, randint(50, win_width - 80), -60, 50, randint(1, 5))
+    monster = Enemy(img_enemy, randint(50, win_width - 80), -60, 80, 50, randint(1, 5))
     monsters.add(monster)
 mixer.init()
 mixer.music.load('space.ogg')
@@ -91,7 +92,8 @@ while run:
                     fire_sound.play()
                     ship.fire()
                 if num_fire >= max_fire and real_time == False:
-                    last_time =
+                    last_time = timer()
+                    real_time = True
     if not finish:
         window.blit(background, (0, 0))
         ship.update()
@@ -107,7 +109,7 @@ while run:
         collides = sprite.groupcollide(monsters, bullets, True, True)
         for c in collides:
             score += 1
-            monster =Enemy(img_enemy, randint(50, win_width - 80))
+            monster = Enemy (img_enemy, randint(50, win_width - 80), -60, 80, 50, randint(1, 5))
             monsters.add(monster)
         if real_time == True:
             now_time = timer()
@@ -146,6 +148,8 @@ while run:
         for m in monsters:
             m.kill()
         for i in range(1,6):
-            monster = Enemy(img_enemy, randint(50, win_width-80), -60, 80, 60, randint(1,5) )
+            monster = Enemy(img_enemy, randint(50, win_width-80), -60, 80, 50, randint(1,5) )
+            monsters.add(monster)
+
     display.update()
     time.delay(50)
